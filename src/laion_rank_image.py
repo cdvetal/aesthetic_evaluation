@@ -11,7 +11,7 @@ from torchvision.transforms.functional import to_pil_image
 from CLIP import clip
 
 class LAIONAesthetic():
-    def __init__(self, device, clip_model):
+    def __init__(self, device, clip_model='vit_l_14'):
         self.device = torch.device(device if torch.cuda.is_available() else 'cpu')
 
         # Map user-supplied model names to the ones available in the CLIP module.
