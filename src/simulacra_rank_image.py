@@ -1,3 +1,10 @@
+import sys
+import os
+
+# Get the parent directory
+parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.insert(0, parent_dir)
+
 from PIL import Image
 import torch
 from torch.nn import functional as F
