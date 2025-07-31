@@ -1,33 +1,86 @@
+from __future__ import annotations
+
+from pathlib import Path
+from typing import Final
+
 from PIL import Image
 import torch
 from torchvision import transforms
+
+# ---------------------------------------------------------------------------
+# Local helper modules
+# ---------------------------------------------------------------------------
+# Assuming all helper modules live next to this file or are discoverable via
+# PYTHONPATH. Adjust the import paths as needed for your project layout.
+
 from src.laion_rank_image import LAIONAesthetic
 from src.simulacra_rank_image import SimulacraAesthetic
+from src.laion_v2_rank_image import LAIONV2Aesthetic
 
-# Load the image
-image_path = "test.png"
-pil_image = Image.open(image_path)
+# ---------------------------------------------------------------------------
+# Settings
+# ---------------------------------------------------------------------------
+DEVICE: Final[torch.device] = torch.device(
+    "cuda" if torch.cuda.is_available() else "cpu"
+)
+CLIP_MODEL_NAME: Final[str] = "ViT-L/14"  # Works for both v1 + v2
 
-# Set the device
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+# ---------------------------------------------------------------------------
+# Helper
+# ---------------------------------------------------------------------------
 
-# Convert the image to a tensor
-img_tensor = transforms.ToTensor()(pil_image).to(device)
+def load_tensor(img_path: Path, device: torch.device) -> torch.Tensor:
+    """Load *img_path* → FloatTensor in [0,1] on *device*."""
+    pil = Image.open(img_path).convert("RGB")
+    return transforms.ToTensor()(pil).to(device)
 
-# Initialize the LAION and Simulacra aesthetic models
-laion_model = LAIONAesthetic(device=device, clip_model="vit_l_14")
-simulacra_model = SimulacraAesthetic(device=device)
 
-# Predict using PIL image
-laion_pil_score = laion_model.predict_from_pil(pil_image)
-simulacra_pil_score = simulacra_model.predict_from_pil(pil_image)
+# ---------------------------------------------------------------------------
+# Main
+# ---------------------------------------------------------------------------
 
-# Predict using tensor image
-laion_tensor_score = laion_model.predict_from_tensor(img_tensor)
-simulacra_tensor_score = simulacra_model.predict_from_tensor(img_tensor)
+def main(img_path: str | Path) -> None:  # noqa: D401 – simple function
+    img_path = Path(img_path)
+    if not img_path.exists():
+        raise FileNotFoundError(img_path)
 
-# Print the results
-print(f"LAION model score (PIL): {laion_pil_score.item()}")
-print(f"LAION model score (Tensor): {laion_tensor_score.item()}")
-print(f"Simulacra model score (PIL): {simulacra_pil_score.item()}")
-print(f"Simulacra model score (Tensor): {simulacra_tensor_score.item()}")
+    print(f"[example.py] Evaluating aesthetic scores for: {img_path}")
+    pil_image = Image.open(img_path).convert("RGB")
+    tensor_image = load_tensor(img_path, DEVICE)
+
+    # Instantiate predictors
+    laion = LAIONAesthetic(device=DEVICE, clip_model=CLIP_MODEL_NAME)
+    simulacra = SimulacraAesthetic(device=DEVICE)
+    laion_v2 = LAIONV2Aesthetic(device=DEVICE, clip_model=CLIP_MODEL_NAME)
+
+    # PIL pipeline (non‑diff)
+    laion_score_pil = laion.predict_from_pil(pil_image)
+    simulacra_score_pil = simulacra.predict_from_pil(pil_image)
+    laion_v2_score_pil = laion_v2.predict_from_pil(pil_image)
+
+    # Tensor pipeline (differentiable)
+    laion_score_tensor = laion.predict_from_tensor(tensor_image)
+    simulacra_score_tensor = simulacra.predict_from_tensor(tensor_image)
+    laion_v2_score_tensor = laion_v2.predict_from_tensor(tensor_image)
+
+    # ------------------------------------------------------------------
+    # Output neatly
+    # ------------------------------------------------------------------
+    print("\n=== Aesthetic scores ===")
+    print(f"LAION v1   (PIL):   {laion_score_pil.item():.4f}")
+    print(f"LAION v1   (Tensor):{laion_score_tensor.item():.4f}")
+    print(f"Simulacra  (PIL):   {simulacra_score_pil.item():.4f}")
+    print(f"Simulacra  (Tensor):{simulacra_score_tensor.item():.4f}")
+    print(f"LAION v2   (PIL):   {laion_v2_score_pil.item():.4f}")
+    print(f"LAION v2   (Tensor):{laion_v2_score_tensor.item():.4f}")
+
+
+if __name__ == "__main__":
+    # import sys
+
+    # if len(sys.argv) != 2:
+    #     print("Usage: python example.py <image_path>")
+    #     raise SystemExit(1)
+
+    # main(sys.argv[1])
+    main("test.png")

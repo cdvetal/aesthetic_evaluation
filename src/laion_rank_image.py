@@ -17,16 +17,13 @@ from torchvision.transforms.functional import to_pil_image
 from CLIP import clip
 
 class LAIONAesthetic():
-    def __init__(self, device, clip_model='vit_l_14'):
+    def __init__(self, device, clip_model='ViT-L/14'):
         self.device = torch.device(device if torch.cuda.is_available() else 'cpu')
 
-        # Map user-supplied model names to the ones available in the CLIP module.
-        if clip_model.lower() == "vit_l_14":
-            self.clip_model_name = "ViT-L/14"
-        elif clip_model.lower() == "vit_b_32":
-            self.clip_model_name = "ViT-B/32"
-        else:
-            self.clip_model_name = clip_model
+        if clip_model != "ViT-L/14" and clip_model != "ViT-B/32":
+            raise ValueError("Unsupported clip model: " + clip_model)
+
+        self.clip_model_name = clip_model
 
         self.clip_model = clip.load(self.clip_model_name, jit=False, device=self.device)[0]
         self.clip_model.eval().requires_grad_(False)
@@ -43,18 +40,25 @@ class LAIONAesthetic():
             self.normalize,
         ])
 
+        if clip_model == "ViT-L/14":
+            clip_model_path_name = "vit_l_14"
+        elif clip_model == "ViT-B/32":
+            clip_model_path_name = "vit_b_32"
+        else:
+            raise ValueError("Unsupported clip model: " + clip_model)
+
         home = expanduser("~")
         cache_folder = home + "/.cache/emb_reader"
-        path_to_model = cache_folder + "/sa_0_4_" + clip_model + "_linear.pth"
+        path_to_model = cache_folder + "/sa_0_4_" + clip_model_path_name + "_linear.pth"
         if not os.path.exists(path_to_model):
             os.makedirs(cache_folder, exist_ok=True)
             url_model = (
-                "https://github.com/LAION-AI/aesthetic-predictor/blob/main/sa_0_4_" + clip_model + "_linear.pth?raw=true"
+                "https://github.com/LAION-AI/aesthetic-predictor/blob/main/sa_0_4_" + clip_model_path_name + "_linear.pth?raw=true"
             )
             urlretrieve(url_model, path_to_model)
-        if clip_model.lower() == "vit_l_14":
+        if clip_model_path_name == "vit_l_14":
             m = nn.Linear(768, 1)
-        elif clip_model.lower() == "vit_b_32":
+        elif clip_model_path_name == "vit_b_32":
             m = nn.Linear(512, 1)
         else:
             raise ValueError("Unsupported clip model: " + clip_model)
