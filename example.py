@@ -82,6 +82,5 @@ if __name__ == "__main__":
         print("Usage: python example.py <image_path>")
         print("No image path provided, using 'test.png' as default.")
         main("test.png")
-        
     else:
         main(sys.argv[1])
