@@ -22,6 +22,12 @@ Run example.py for testing the framework.
 
     ```conda env create -f environment.yml```
 
+3. **Install openclip:**
+    ```python -m pip install open_clip_torch```
+
 ## Current Models
-- LAION Aesthetic Predictor
-- Simulacra Aesthetic Predictor
+- LAION Aesthetic Predictor v1 and v2 
+- Simulacra Aesthetic Predictor 
+
+## Usage Example
+    ```python example.py <image_path>```
