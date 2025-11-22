@@ -21,6 +21,8 @@ Run example.py for testing the framework.
 2. **Create the conda environment:**
 
     ```conda env create -f environment.yml```
+3. **Install open clip: **
+  ```python -m pip install open_clip_torch```
 
 ## Current Models
 - LAION Aesthetic Predictor v1 and v2
@@ -28,4 +30,4 @@ Run example.py for testing the framework.
 
 ## Example of usage
 
-- python example.py <image_path>
+- ```python example.py <image_path>```
