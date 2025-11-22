@@ -80,8 +80,7 @@ if __name__ == "__main__":
 
     if len(sys.argv) != 2:
         print("Usage: python example.py <image_path>")
-        print("Example: python example.py test.png")
-        print("Using default test image 'test.png'")
+        print("No image path provided, using 'test.png' as default.")
         main("test.png")
     else:
         main(sys.argv[1])
