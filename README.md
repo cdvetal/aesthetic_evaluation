@@ -23,5 +23,9 @@ Run example.py for testing the framework.
     ```conda env create -f environment.yml```
 
 ## Current Models
-- LAION Aesthetic Predictor
+- LAION Aesthetic Predictor v1 and v2
 - Simulacra Aesthetic Predictor
+
+## Example of usage
+
+- python example.py <image_path>
