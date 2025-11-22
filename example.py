@@ -76,11 +76,12 @@ def main(img_path: str | Path) -> None:  # noqa: D401 – simple function
 
 
 if __name__ == "__main__":
-    # import sys
+    import sys
 
-    # if len(sys.argv) != 2:
-    #     print("Usage: python example.py <image_path>")
-    #     raise SystemExit(1)
-
-    # main(sys.argv[1])
-    main("test.png")
+    if len(sys.argv) != 2:
+        print("Usage: python example.py <image_path>")
+        print("No image path provided, using 'test.png' as default.")
+        main("test.png")
+        
+    else:
+        main(sys.argv[1])
